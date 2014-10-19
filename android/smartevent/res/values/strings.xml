@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Smart Event</string>
+    <string name="action_settings">Settings</string>
+
+    
+    <!-- User Screen Activity -->
+    <string name="button_update">Continue</string>
+    <string name="person_name">Your Name</string>
+    <string name="person_surename">Your Surename</string>
+    <string name="person_role">role</string>
+    <string-array name="roles">
+        <item>Mentor</item>
+        <item>Organizer</item>
+        <item>Participant</item>
+        <item>Visitor</item>
+    </string-array> 
+    <string name="person_description">.... a short description about you !</string>
+    <string name="person_avatar">Your selfie !</string>
+    <string name="fail_update_user">Failed update User !</string>
+    <string name="success_update_user">User updated successfuly !</string>
+
+    
+</resources>
