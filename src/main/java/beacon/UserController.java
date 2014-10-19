@@ -1,9 +1,7 @@
 package beacon;
 
-import beacon.entity.ImportExport;
 import beacon.entity.User;
 import beacon.entity.UserJson;
-import beacon.repository.BeaconRepository;
 import beacon.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/user")
@@ -46,7 +43,9 @@ public class UserController {
 
         User user = new User(firstName, lastName, userFunction, description);
         try {
-            user.setPicture(file.getBytes());
+            if (file != null) {
+                user.setPicture(file.getBytes());
+            }
         } catch (IOException ex) {
             throw new RestClientException("bad file upload");
         }
