@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="../asset/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../asset/jquery.form.js"></script>
+    <script src="../asset/moment.js"></script>
+    <script src="../asset/dat-picker.js"></script>
+    <script src="../asset/jquery.serializeObject.min.js"></script>
+    <link rel="stylesheet" href="../asset/normalize.css">
+
+    <script src="/client/asset/sockjs-0.3.4.js"></script>
+    <script src="/client/asset/stomp.js"></script>
+    <script type="text/javascript">
+
+var qs = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=', 2);
+        if (p.length == 1)
+            b[p[0]] = "";
+        else
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    }
+    return b;
+})(window.location.search.substr(1).split('&'));
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+        var roomId = getParameterByName("roomId");
+        var userId = getParameterByName("userId");
+        var userName = getParameterByName("userName");
+
+        var stompClient = null;
+
+        function setConnected(connected) {
+            //document.getElementById('connect').disabled = connected;
+            //document.getElementById('disconnect').disabled = !connected;
+            //document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+            //document.getElementById('response').innerHTML = '';
+        }
+
+        function connect() {
+            var socket = new SockJS('/raiseHand');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/roomwatch', function(greeting){
+                    updateState(JSON.parse(greeting.body));
+                });
+            });
+        }
+
+        function disconnect() {
+            stompClient.disconnect();
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            stompClient.send("/app/raiseHand", {}, JSON.stringify({ 'message': message, 'userId': userId, 'roomId': roomId, 'userName': userName }));
+        }
+
+
+        function updateState(message) {
+        //alert(roomId);
+            if (roomId != message.roomId) return;
+            imgUrl = "/user/"+message.userId+"/picture/";
+            //$("#image").html("<img src='" + imgUrl + "' width='200px'/>");
+            //$("#msg").html(message.message);
+
+            str = '<div class="alert alert-warning alert-dismissible" role="alert">' +
+                        '<div><img src="' + imgUrl + '" width="32"</div>' +
+                            '<strong>New Message from '+ message.userName +'!</strong> <p>' + message.message + '</p></div>';
+
+            $("#messages").append(str);
+            $('html, body').animate({
+                scrollTop:$("#messages .alert:last-child").offset().top
+            }, 200);
+
+
+        }
+    $( document ).ready(function() {
+       connect();
+    });
+    </script>
+<style>
+    body{
+        background-color:transparent;
+    }
+    #messages{
+        margin-bottom: 40px
+    }
+    #form_container {
+        position: fixed;
+        bottom:0;
+        height:40px;
+        width: 100%;
+    }
+    #form_container input{
+        width:80%;
+        height:100%
+    }
+    #form_container button {
+        width:20%;
+    border-radius:0px;
+        height:100%;
+    }
+
+</style>
+</head>
+<body>
+<!--<div class="panel-group container">-->
+
+    <div class="form-inline" id="form_container">
+        <!--<label class="col-sm-2 control-label">Room chatboard</label>-->
+
+            <input type="text" id="message" /><button onclick="sendMessage();" class="btn btn-default">Send</button>
+
+    </div>
+
+    <div id="messages">
+        <!--<div>-->
+        <!--<button id="connect" onclick="connect();">Connect</button>-->
+        <!--<button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>-->
+        <!--</div>-->
+
+    </div>
+
+    <!--<div id="conversationDiv">-->
+<!---->
+        <!--<label>Message</label><input type="text" id="message" />-->
+        <!--<button id="sendName" onclick="sendName();">Send</button>-->
+        <!--<p id="response"></p>-->
+    <!--</div>-->
+
+<!--</div>-->
+<script>$(".alert").alert()</script>
+</body>
+</html>
